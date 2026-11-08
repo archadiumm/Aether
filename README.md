@@ -1,4 +1,4 @@
 <div align="center">
-    <img src="https://raw.githubusercontent.com/archadiumm/Aether/refs/heads/main/img/aetherlogo.png" width="600">
+    <img src="https://github.com/archadiumm/Aether/blob/main/aetherlogo.png?raw=true" width="600">
 </div>
 <hr>
