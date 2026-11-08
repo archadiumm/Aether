@@ -23,8 +23,8 @@
 Aether currently supports the following:
 
 - [x] Remote Spamming detection
-- [x] Infinite Jump detection (messy at the moment)
-- [ ] Fling detection
+- [x] Infinite Jump detection
+- [x] Fling detection
 - [ ] Fly detection
 - [ ] Noclip detection <i>(..and more!)</i>
 

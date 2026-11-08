@@ -21,7 +21,10 @@ const Players = game:GetService("Players")
 
 const defaultOptions = {
 	RemoteSpam = true :: boolean?, -- // Detects remote spamming 
-	ClientCheats = true :: boolean? -- // Detects client exploits (Infinite Jump, Flings, etc.)
+	InfiniteJump = true :: boolean?, -- // Detects infinite jumping
+	Modifications = true :: boolean?, -- // Detects humanoid modifications like speedhack, jumphack, etc.
+	Tampering = true :: boolean?, -- // Detects if the client-sided scripts get deleted/disabled.
+	Fling = false :: boolean? -- // Detects exploits that fling other players.
 }
 
 export type cheatOptions = typeof(defaultOptions)
@@ -33,19 +36,23 @@ function Main:init(cheats: cheatOptions?)
 		if cheats[key] == nil then
 			cheats[key] = defaultOptions[key]
 		end
+		
+		ReplicatedStorage:SetAttribute(key, cheats[key])
 	end
 	
 	Remotes.Name = "Aether"
 	Remotes.Parent = ReplicatedStorage
+	
+	if cheats.Tampering then
+		ClientAdd:init()
+	end
 
 	if cheats.RemoteSpam then
 		RemoteSpam:init()
 	end
 	
 	Players.PlayerAdded:Connect(function(player: Player)
-		if cheats.ClientCheats then
-			ClientAdd.add(player)
-		end
+		ClientAdd.add(player)
 		
 		if cheats.RemoteSpam then
 			RemoteSpam.watch(player)

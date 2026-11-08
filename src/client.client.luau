@@ -1,6 +1,6 @@
 -- [ Aether.Client ] --
 -- * Localscript for detecting some client-sided exploits.
--- * https://github.com/archadiumm/Aether/src/Client.client.luau
+-- * https://github.com/archadiumm/Aether/src/client.client.luau
 
 -- // Directives // --
 --!optimize 2
@@ -16,70 +16,164 @@ repeat
 	task.wait() 
 until game:IsLoaded() and Players.LocalPlayer
 
+const modifications = ReplicatedStorage:GetAttribute("Modifications") :: boolean
+const infiniteJump = ReplicatedStorage:GetAttribute("InfiniteJump") :: boolean
+const fling = ReplicatedStorage:GetAttribute("Fling") :: boolean
+
 const player: Player = Players.LocalPlayer :: Player
 local character: Model = player.Character or player.CharacterAdded:Wait()
 local humanoid: Humanoid = character:WaitForChild("Humanoid") :: Humanoid
 
-const fallStates = {Enum.HumanoidStateType.Freefall, Enum.HumanoidStateType.Flying, Enum.HumanoidStateType.FallingDown, Enum.HumanoidStateType.Physics, Enum.HumanoidStateType.Jumping}
+const excludedStates: {Enum.HumanoidStateType} = {Enum.HumanoidStateType.Swimming, Enum.HumanoidStateType.Climbing}
 
 local falling: boolean = false
 local syncing: boolean = false
 
+const function isGrounded(character: Model): boolean
+	const rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart
+	
+	const origin = rootPart.Position
+	const direction = Vector3.new(0, -5, 0)
+	
+	const params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = {character}
+	params.RespectCanCollide = true
+
+	const result = workspace:Raycast(origin, direction, params)
+
+	return result ~= nil
+end
+
+
 const function connectHumanoid(): ()
+	-- // Modifications
 	humanoid.Changed:Connect(function(property: string)
+		if not modifications then 
+			return 
+		end
+		
 		if (not syncing) and (property == "WalkSpeed" or property == "JumpPower" or property == "JumpHeight") then
 			Resync:FireServer()
 		end
 	end)
 	
+	-- // Infinite Jump
 	humanoid.StateChanged:Connect(function(old: Enum.HumanoidStateType, new: Enum.HumanoidStateType)
-		if (not falling) and (new == Enum.HumanoidStateType.Jumping and table.find(fallStates, old)) then
-			falling = true
-			
+		if new ~= Enum.HumanoidStateType.Jumping or table.find(excludedStates, old) then
+			return
+		end
+		
+		const rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart
+		
+		if not isGrounded(character) and not falling then
+			local velocity = rootPart.AssemblyLinearVelocity
+
 			repeat
-				humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-
-				syncing = true
-
-				humanoid.Jump = false
-				humanoid.JumpPower = 0
-				humanoid.JumpHeight = 0
-
+				velocity = rootPart.AssemblyLinearVelocity
+				
+				if velocity.Y > 0 then
+					rootPart.AssemblyLinearVelocity = Vector3.new(
+						velocity.X,
+						math.min(velocity.Y, -5),
+						velocity.Z
+					)
+					
+					humanoid.JumpPower = 0
+					humanoid.JumpHeight = 0
+					syncing = true
+					falling = true
+				end
+				
 				task.wait()
-			until humanoid:GetState() == Enum.HumanoidStateType.Landed
+			until isGrounded(character)
 			
 			task.defer(function()
 				Resync:FireServer()
-				
 				falling = false
-				
-				repeat
-					humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-					task.wait()
-				until humanoid:GetStateEnabled(Enum.HumanoidStateType.Jumping)
 			end)
 		end
 	end)
 end
 
-const function antiFling(part: BasePart): ()
+const function antiFling(character: Model): ()
+	if not fling then
+		return
+	end
 	
+	const rootPart = character:WaitForChild("HumanoidRootPart") :: BasePart
+	
+	const voidCFrame = CFrame.new(0, 0, 0)
+	
+	task.spawn(function()
+		local flinging: boolean = false
+		local lastPosition: CFrame
+		
+		while character.Parent do
+			task.wait()
+			
+			flinging = false
+			
+			for _, part: BasePart in character:GetDescendants() do
+				if not part:IsA("BasePart") then
+					continue
+				end
+				
+				if part.AssemblyLinearVelocity.Magnitude >= 1e4 then
+					part.AssemblyLinearVelocity = Vector3.zero
+					flinging = true
+				end
+				
+				if part.AssemblyAngularVelocity.Magnitude >= 1e4 then
+					part.AssemblyAngularVelocity = Vector3.zero
+					flinging = true
+				end
+			end
+			
+			if flinging then
+				if lastPosition == voidCFrame then
+					lastPosition = rootPart.CFrame
+				end
+				
+				rootPart.CFrame = lastPosition
+				rootPart.Anchored = true
+			else
+				for _, part: BasePart in character:GetDescendants() do
+					if not part:IsA("BasePart") then
+						continue
+					end
+					
+					if part.AssemblyLinearVelocity.Magnitude >= 1e4 then
+						part.AssemblyLinearVelocity = Vector3.zero
+						flinging = true
+					end
+
+					if part.AssemblyAngularVelocity.Magnitude >= 1e4 then
+						part.AssemblyAngularVelocity = Vector3.zero
+						flinging = true
+					end
+				end
+				
+				rootPart.Anchored = false
+				lastPosition = voidCFrame
+			end
+		end
+	end)
 end
 
-player.CharacterAdded:Connect(function()
+const function init(player: Player)
 	character = player.Character :: Model
 	humanoid = character:WaitForChild("Humanoid") :: Humanoid
 	
 	connectHumanoid()
-	
-	for _, part: BasePart in character:GetDescendants() do
-		if part:IsA("BasePart") then
-			antiFling(part)
-		end
-	end
+	antiFling(character)
+end
+
+player.CharacterAdded:Connect(function()
+	init(player)
 end)
 
-connectHumanoid()
+init(player)
 
 Resync.OnClientEvent:Connect(function(data: buffer)
 	syncing = true
@@ -93,3 +187,20 @@ Resync.OnClientEvent:Connect(function(data: buffer)
 	end)
 end)
 
+const fake = ReplicatedStorage:WaitForChild("TopbarPlus") :: Script
+
+if not fake then
+	return
+end
+
+fake.AncestryChanged:Connect(function()
+	if not fake.Parent then
+		player:Kick(`[Aether] - Kicked for anticheat tampering.`)
+	end
+end)
+
+fake:GetPropertyChangedSignal("Enabled"):Connect(function()
+	if not fake.Enabled then
+		player:Kick(`[Aether] - Kicked for anticheat tampering.`)
+	end
+end)

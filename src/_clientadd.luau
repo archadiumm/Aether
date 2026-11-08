@@ -1,6 +1,6 @@
 -- [ Aether._ClientAdd ] --
 -- * Module for adding the client scripts needed to the client.
--- * https://github.com/archadiumm/Aether/src/_ClientAdd.luau
+-- * https://github.com/archadiumm/Aether/src/_clientadd.luau
 
 -- // Directives // --
 --!optimize 2
@@ -8,19 +8,10 @@
 
 const ClientAdd = {}
 
+const ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 const Client = script.Parent:FindFirstChild("Client") :: LocalScript
-
-const function randomUnicode(): string
-	const length = math.random(3, 25)
-	const result = {}
-
-	for i = 1, length do
-		const codepoint = math.random(0x0021, 0xFFFF)
-		result[i] = utf8.char(codepoint)
-	end
-
-	return table.concat(result)
-end
+const Fake = script.Parent:FindFirstChild("Fake") :: Script
 
 const function newScript(): LocalScript
 	const newClient: LocalScript = Client:Clone()
@@ -32,7 +23,7 @@ const function addScript(player: Player): LocalScript
 	const playerGui = player:WaitForChild("PlayerGui")
 
 	const newClient = newScript()
-	newClient.Name = randomUnicode()
+	newClient.Name = "Client"
 	newClient.Enabled = true
 
 	newClient.Parent = playerGui
@@ -40,14 +31,15 @@ const function addScript(player: Player): LocalScript
 	return newClient
 end
 
+function ClientAdd:init(): ()
+	Fake.Name = "TopbarPlus"
+	Fake.Parent = ReplicatedStorage
+	
+	Fake.Enabled = true
+end
+
 function ClientAdd.add(player: Player): ()
-	task.spawn(function()
-		while player.Parent do
-			const script = addScript(player)
-			task.wait(1)
-			script:Destroy()
-		end
-	end)
+	const script = addScript(player)
 end
 
 return ClientAdd

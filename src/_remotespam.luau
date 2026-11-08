@@ -1,6 +1,6 @@
 -- [ Aether._RemoteSpam ] --
 -- * Module for detecting Remote Spamming.
--- * https://github.com/archadiumm/Aether/src/_RemoteSpam.luau
+-- * https://github.com/archadiumm/Aether/src/_remotespam.luau
 
 -- // Directives // --
 --!optimize 2
@@ -22,8 +22,8 @@ const function onRemoteEvent(remote: (RemoteEvent | RemoteFunction), player: Pla
 	const amount = players[userId][remote.Name]
 	
 	if amount >= 5 then
-		if remote.Name == "Resync" then
-			player:Kick(`[Aether] - Kicked for attempted speed/jump exploits.`)
+		if remote.Name == "Resync" and amount >= 10 then
+			player:Kick(`[Aether] - Kicked for attempted humanoid modifications.`)
 		else
 			player:Kick(`[Aether] - Kicked for remote spam.\n* Fired {remote.Name} {amount} times per second.`)
 		end
