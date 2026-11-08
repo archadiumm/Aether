@@ -1,6 +1,6 @@
 <div align="center">
     <a href="https://github.com/archadiumm/Aether/releases/latest">
-        <img src="https://github.com/archadiumm/Aether/blob/main/img/Aether.png?raw=true" width="600">
+        <img src="https://github.com/archadiumm/Aether/blob/main/img/Aether_2.png?raw=true" width="600">
     </a>
     <br>
     <p style="color: #888888;">
