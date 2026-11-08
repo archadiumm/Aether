@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/archadiumm/Aether/blob/main/img/Aether.png?raw=true" width="600">
+    <img src="https://github.com/archadiumm/Aether/blob/main/img/Aether.png?raw=true" width="600" href="https://github.com/archadiumm/Aether/releases/latest">
     <br>
     <p style="color: #888888;">
         <code>~ General purpose <a href="create.roblox.com">Roblox</a> anticheat ~</code>
