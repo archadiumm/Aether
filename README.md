@@ -48,7 +48,7 @@ You can also selectively toggle anticheat modules using a parameter inside of th
 const options: Main.cheatOptions = {}
 options.RemoteSpam = false -- // Turns Remote Spam detection off.
 
-Main:Init(options)
+Main:init(options)
 ```
 
 Here is the list of Aether config settings if you need them (they are also present in the main module):
