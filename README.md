@@ -41,13 +41,27 @@ const Main = require(Aether.Main)
 Main:init()
 ```
 
-You can also selectively toggle anticheat modules using a parameter inside of the init.
+# Configurations
 
+You can also selectively toggle anticheat modules using a parameter inside of the init.
 ```luau
 const options: Main.cheatOptions = {}
 options.RemoteSpam = false -- // Turns Remote Spam detection off.
 
 Main:Init(options)
 ```
+
+Here is the list of Aether config settings if you need them (they are also present in the main module):
+```luau
+Fling -- // Detects exploits that fling other players.
+Noclip -- // Detects exploits that noclip through objects.
+RemoteSpam -- // Detects remote spamming.
+InfiniteJump -- // Detects infinite jumping.
+Modifications -- // Detects humanoid modifications like speedhack, jumphack, etc.
+
+Debug -- // Enables debug info. Used to test if Aether is falsely blocking parts of your game.
+```
+
+Since this is a general-use anticheat, some modules may unintentionally interfere with your game and make certain aspects unplayable. It is reccomended to use the `Debug` option to test which scripts are activating what.
 
 Keep in mind that __**Aether is in beta**__. It is not recommended to use Aether until an official release is made.
