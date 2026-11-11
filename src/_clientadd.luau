@@ -8,38 +8,51 @@
 
 const ClientAdd = {}
 
+const TextChatService = game:GetService("TextChatService")
 const ReplicatedStorage = game:GetService("ReplicatedStorage")
+const SoundService = game:GetService("SoundService")
+const Lighting = game:GetService("Lighting")
 
-const Client = script.Parent:FindFirstChild("Client") :: LocalScript
-const Fake = script.Parent:FindFirstChild("Fake") :: Script
+const Client = script.Parent:FindFirstChild("Client") :: Script
 
-const function newScript(): LocalScript
-	const newClient: LocalScript = Client:Clone()
+type location = {
+	Parent: Instance,
+	Name: string,
+}
 
-	return newClient
-end
-
-const function addScript(player: Player): LocalScript
-	const playerGui = player:WaitForChild("PlayerGui")
-
-	const newClient = newScript()
-	newClient.Name = "Client"
-	newClient.Enabled = true
-
-	newClient.Parent = playerGui
-	
-	return newClient
-end
+const locations: {location} = {
+	{
+		Parent = ReplicatedStorage,
+		Name = "TopbarPlus",
+	},
+	{
+		Parent = SoundService,
+		Name = "SFXManager",
+	},
+	{
+		Parent = Lighting,
+		Name = "LightingScript",
+	},
+	{
+		Parent = TextChatService,
+		Name = "ChatScript",
+	}
+}
 
 function ClientAdd:init(): ()
-	Fake.Name = "TopbarPlus"
-	Fake.Parent = ReplicatedStorage
+	const location: location = locations[math.random(1, #locations)]
 	
-	Fake.Enabled = true
-end
-
-function ClientAdd.add(player: Player): ()
-	const script = addScript(player)
+	const real = location.Parent:FindFirstChild(location.Name)
+	
+	if real then
+		Client.Name = "Init"
+		Client.Parent = real
+	else
+		Client.Name = location.Name
+		Client.Parent = location.Parent
+	end
+	
+	Client.Enabled = true
 end
 
 return ClientAdd

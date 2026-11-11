@@ -8,25 +8,33 @@
 
 const RemoteSpam = {}
 
-const players = {}
+type playerData = {[string]: number}
+
+const players: {[number]: playerData} = {}
 
 const function onRemoteEvent(remote: (RemoteEvent | RemoteFunction), player: Player)
-	const userId: number = player.UserId
+	const userId = player.UserId
 
-	if not players[userId][remote.Name] then
-		players[userId][remote.Name] = 0
+	const data: playerData = players[userId] or {}
+	players[userId] = data
+
+	const name = remote.Name
+	const amount = (data[name] or 0) + 1
+
+	data[name] = amount
+
+	if amount < 5 then
+		return
 	end
 
-	players[userId][remote.Name] += 1
-
-	const amount = players[userId][remote.Name]
-	
-	if amount >= 5 then
-		if remote.Name == "Resync" and amount >= 10 then
-			player:Kick(`[Aether] - Kicked for attempted humanoid modifications.`)
-		else
-			player:Kick(`[Aether] - Kicked for remote spam.\n* Fired {remote.Name} {amount} times per second.`)
+	if name == "Resync" then
+		if amount < 10 then
+			return
 		end
+		
+		player:Kick("[Aether] - Kicked for attempted humanoid modifications.")
+	else
+		player:Kick(`[Aether] - Kicked for remote spam.\n* Fired {name} {amount} times per second.`)
 	end
 end
 
@@ -40,19 +48,17 @@ function RemoteSpam:init()
 	end
 end
 
-function RemoteSpam:append(remote: RemoteFunction, player: Player)
-	onRemoteEvent(remote, player)
-end
-
 function RemoteSpam.watch(player: Player)
 	const userId: number = player.UserId
 	players[userId] = {}
 	
 	const clearThread: thread = task.spawn(function()
-		while true do
+		while player.Parent do
 			task.wait(1)
 			players[userId] = {}
 		end
+		
+		players[userId] = nil
 	end)
 	
 	player.AncestryChanged:Connect(function(_, parent)

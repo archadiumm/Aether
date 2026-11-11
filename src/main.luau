@@ -15,21 +15,32 @@ const Resync = Remotes:FindFirstChild("Resync")
 
 const RemoteSpam = require("./_RemoteSpam")
 const ClientAdd = require("./_ClientAdd")
+const Noclip = require("./_Noclip")
+const Fling = require("./_Fling")
 
+const ServerScriptService = game:GetService("ServerScriptService")
 const ReplicatedStorage = game:GetService("ReplicatedStorage")
 const Players = game:GetService("Players")
 
 const defaultOptions = {
-	RemoteSpam = true :: boolean?, -- // Detects remote spamming 
-	InfiniteJump = true :: boolean?, -- // Detects infinite jumping
+	Fling = true :: boolean?, -- // Detects exploits that fling other players.
+	Noclip = true :: boolean?, -- // Detects exploits that noclip through objects.
+	RemoteSpam = true :: boolean?, -- // Detects remote spamming.
+	InfiniteJump = true :: boolean?, -- // Detects infinite jumping.
 	Modifications = true :: boolean?, -- // Detects humanoid modifications like speedhack, jumphack, etc.
-	Tampering = true :: boolean?, -- // Detects if the client-sided scripts get deleted/disabled.
-	Fling = false :: boolean? -- // Detects exploits that fling other players.
+	
+	Debug = true :: boolean? -- // Enables debug info. Used to test if Aether is falsely blocking parts of your game.
 }
 
 export type cheatOptions = typeof(defaultOptions)
 
 function Main:init(cheats: cheatOptions?)
+	const packageParent = script.Parent.Parent
+	
+	if packageParent ~= ServerScriptService then
+		warn(`[Aether] - Aether's package is intended to be parented to ServerScriptService, not {packageParent.Name}.`)
+	end
+	
 	const cheats = cheats or defaultOptions
 	
 	for key: string, _ in defaultOptions do
@@ -43,7 +54,7 @@ function Main:init(cheats: cheatOptions?)
 	Remotes.Name = "Aether"
 	Remotes.Parent = ReplicatedStorage
 	
-	if cheats.Tampering then
+	if cheats.Modifications then
 		ClientAdd:init()
 	end
 
@@ -51,11 +62,25 @@ function Main:init(cheats: cheatOptions?)
 		RemoteSpam:init()
 	end
 	
+	if cheats.Fling then
+		Fling:init()
+	end
+	
+	if cheats.Noclip then
+		Noclip:init()
+	end
+	
 	Players.PlayerAdded:Connect(function(player: Player)
-		ClientAdd.add(player)
-		
 		if cheats.RemoteSpam then
 			RemoteSpam.watch(player)
+		end
+		
+		if cheats.Fling then
+			Fling.watch(player)
+		end
+		
+		if cheats.Noclip then
+			Noclip.watch(player)
 		end
 	end)
 
