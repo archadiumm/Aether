@@ -30,6 +30,7 @@ type freezeData = {
 }
 
 local isDebug: boolean = ReplicatedStorage:GetAttribute("Debug")
+local initialized: boolean = false
 
 function dPrint(...): ()
 	if isDebug == nil then
@@ -177,6 +178,13 @@ end
 
 
 function Fling:init(): ()
+	if initialized then
+		warn("[Aether] - Fling module is already initialized.")
+		return
+	else
+		initialized = true
+	end
+	
 	RunService.PostSimulation:Connect(enforceFreeze)
 end
 

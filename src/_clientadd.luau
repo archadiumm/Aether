@@ -15,6 +15,8 @@ const Lighting = game:GetService("Lighting")
 
 const Client = script.Parent:FindFirstChild("Client") :: Script
 
+local initialized: boolean = false
+
 type location = {
 	Parent: Instance,
 	Name: string,
@@ -40,6 +42,13 @@ const locations: {location} = {
 }
 
 function ClientAdd:init(): ()
+	if initialized then
+		warn("[Aether] - ClientAdd module is already initialized.")
+		return
+	else
+		initialized = true
+	end
+	
 	const location: location = locations[math.random(1, #locations)]
 	
 	const real = location.Parent:FindFirstChild(location.Name)

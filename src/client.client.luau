@@ -181,20 +181,8 @@ end)
 
 init(player)
 
-Resync.OnClientEvent:Connect(function(data: buffer)
+Resync.OnClientEvent:Connect(function()
 	syncing = true
-	
-	if humanoid.WalkSpeed ~= buffer.readu16(data, 0) then
-		dPrint(`[Aether._Client] - Resyncing WalkSpeed (Client: {humanoid.WalkSpeed} | Server: {buffer.readu16(data, 0)})`)
-	elseif humanoid.JumpPower ~= buffer.readu16(data, 2) then
-		dPrint(`[Aether._Client] - Resyncing JumpPower (Client: {humanoid.JumpPower} | Server: {buffer.readu16(data, 2)})`)
-	elseif humanoid.JumpHeight ~= buffer.readu16(data, 4) then
-		dPrint(`[Aether._Client] - Resyncing JumpHeight (Client: {humanoid.JumpHeight} | Server: {buffer.readu16(data, 4)})`)
-	end
-
-	humanoid.WalkSpeed = buffer.readu16(data, 0)
-	humanoid.JumpPower = buffer.readu16(data, 2)
-	humanoid.JumpHeight = buffer.readu16(data, 4)
 
 	task.defer(function()
 		syncing = false

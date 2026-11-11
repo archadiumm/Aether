@@ -12,6 +12,8 @@ type playerData = {[string]: number}
 
 const players: {[number]: playerData} = {}
 
+local initialized: boolean = false
+
 const function onRemoteEvent(remote: (RemoteEvent | RemoteFunction), player: Player)
 	const userId = player.UserId
 
@@ -39,6 +41,13 @@ const function onRemoteEvent(remote: (RemoteEvent | RemoteFunction), player: Pla
 end
 
 function RemoteSpam:init()
+	if initialized then
+		warn("[Aether] - RemoteSpam module is already initialized.")
+		return
+	else
+		initialized = true
+	end
+	
 	for _, remote: Instance in pairs(game:GetDescendants()) do
 		if remote:IsA("RemoteEvent") then
 			remote.OnServerEvent:Connect(function(player: Player)

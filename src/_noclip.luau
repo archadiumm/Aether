@@ -26,6 +26,7 @@ const characters: {[Model]: data} = {}
 const rootSize = Vector3.new(2, 2, 1)
 
 local isDebug: boolean = ReplicatedStorage:GetAttribute("Debug")
+local initialized: boolean = false
 
 function dPrint(...): ()
 	if isDebug == nil then
@@ -94,6 +95,13 @@ const function getPenetration(result: RaycastResult, position: Vector3, size: Ve
 end
 
 function Noclip:init()
+	if initialized then
+		warn("[Aether] - Noclip module is already initialized.")
+		return
+	else
+		initialized = true
+	end
+	
 	RunService.PreSimulation:Connect(function()
 		for character: Model, data: data in characters do
 			if not character.Parent then

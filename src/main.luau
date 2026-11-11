@@ -29,17 +29,24 @@ const defaultOptions = {
 	InfiniteJump = true :: boolean?, -- // Detects infinite jumping.
 	Modifications = true :: boolean?, -- // Detects humanoid modifications like speedhack, jumphack, etc.
 	
-	Debug = true :: boolean? -- // Enables debug info. Used to test if Aether is falsely blocking parts of your game.
+	Debug = false :: boolean? -- // Enables debug info. Used to test if Aether is falsely blocking parts of your game.
 }
 
 export type cheatOptions = typeof(defaultOptions)
+
+local initialized: boolean = false
 
 function Main:init(cheats: cheatOptions?)
 	const packageParent = script.Parent.Parent
 	
 	if packageParent ~= ServerScriptService then
 		warn(`[Aether] - Aether's package is intended to be parented to ServerScriptService, not {packageParent.Name}.`)
+	elseif initialized then
+		warn("[Aether] - Aether is already initialized.")
+		return
 	end
+	
+	initialized = true
 	
 	const cheats = cheats or defaultOptions
 	
@@ -87,13 +94,20 @@ function Main:init(cheats: cheatOptions?)
 	Resync.OnServerEvent:Connect(function(player: Player)
 		const character = player.Character or player.CharacterAdded:Wait()
 		const humanoid = character:WaitForChild("Humanoid") :: Humanoid
-
-		const data = buffer.create(6)
-		buffer.writeu16(data, 0, humanoid.WalkSpeed)
-		buffer.writeu16(data, 2, humanoid.JumpPower)
-		buffer.writeu16(data, 4, humanoid.JumpHeight)
-
-		Resync:FireClient(player, data)
+		
+		const humanoidData = table.freeze({
+			WalkSpeed = humanoid.WalkSpeed,
+			JumpPower = humanoid.JumpPower,
+			JumpHeight = humanoid.JumpHeight
+		})
+		
+		humanoid.WalkSpeed = 0
+		humanoid.JumpPower = 0
+		humanoid.JumpHeight = 0
+		
+		humanoid.WalkSpeed = humanoidData.WalkSpeed
+		humanoid.JumpPower = humanoidData.JumpPower
+		humanoid.JumpHeight = humanoidData.JumpHeight
 	end)
 end
 
