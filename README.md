@@ -65,6 +65,8 @@ Debug -- // Enables debug info. Used to test if Aether is falsely blocking parts
 Since this is a general-use anticheat, some modules may unintentionally interfere with your game and make certain aspects unplayable. It is reccomended to use the `Debug` option to test which scripts are activating what.
 
 # Showcase
-[<img src="https://img.youtube.com/vi/jgeY58bfh-4/hqdefault.jpg" width="600" height="300"/>](https://www.youtube.com/embed/jgeY58bfh-4)
+Click the image below to watch the showcase.
+
+[<img src="https://img.youtube.com/vi/jgeY58bfh-4/hqdefault.jpg" width="300" height="180"/>](https://www.youtube.com/embed/jgeY58bfh-4)
 
 Keep in mind that __**Aether is in beta**__. It is not recommended to use Aether until an official release is made.
